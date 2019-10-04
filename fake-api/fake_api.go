@@ -76,7 +76,7 @@ func StartServer() {
 
 	})
 
-	http.ListenAndServeTLS(":8080", nil)
+	http.ListenAndServe(":8080", nil)
 }
 
 func main() {

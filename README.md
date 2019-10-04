@@ -1,9 +1,14 @@
 # space-ape-gbe
 Spaceape Technical Test: Giant Bomb Edition
 
+We discovered this api has pagination and only allows a maximum limit value of 100
 
 TODO:
 add config for api_key (currently hardcoded)
+
+
+// currently this will dump the json as is, improvement could be to use text/template
+
 
 We decide on using json as output for composability
 

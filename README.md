@@ -3,6 +3,10 @@ Spaceape Technical Test: Giant Bomb Edition
 
 We discovered this api has pagination and only allows a maximum limit value of 100
 
+
+
+NOTE:
+Despite giantbomb's api has an invalid api key error the api just returns 401 with an empty body.
 TODO:
 add config for api_key (currently hardcoded)
 

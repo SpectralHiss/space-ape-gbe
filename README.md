@@ -11,11 +11,8 @@ TODO:
 add config for api_key (currently hardcoded)
 
 
-// currently this will dump the json as is, improvement could be to use text/template
-
-
-We decide on using json as output for composability
+// currently this will dump the json as is, improvement could be to use "text/template" to beautify or give option
 
 jq pattern used to extract correct structure for search:
 
-cat 1.json 2.json 3.json | jq  '[.results[] | {name : .name, deck: .deck, release_date:(.expected_release_year // "not yet released") , platforms: [.platforms[]? | .name ]}] ' > output
+cat 1.json 2.json 3.json | jq  '[.results[] | {name : .name, deck: .deck, release_date:(.expected_release_year // "not yet released") , platforms: [.platforms[]? | .name ], id: .id}] ' > output.json

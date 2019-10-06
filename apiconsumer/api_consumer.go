@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"math"
 	"net/http"
 	"net/url"
@@ -56,6 +58,15 @@ func BuildQuery(url string, path string, params url.Values) string {
 	return fmt.Sprintf("%s/%s?%s", url, path, params.Encode())
 }
 
+func debugBody(r io.ReadCloser) {
+	data, err := ioutil.ReadAll(r)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Printf("%s", data)
+}
+
 func (ae *GbeConsumer) ApiTraverse(path, queryString string) ([]json.RawMessage, error) {
 
 	params, err := url.ParseQuery(queryString)
@@ -75,6 +86,9 @@ func (ae *GbeConsumer) ApiTraverse(path, queryString string) ([]json.RawMessage,
 	}
 
 	apiErrors := &APIErrors{}
+
+	//debugBody(resp.Body)
+
 	decoder := json.NewDecoder(resp.Body)
 
 	var apiResponse1 = &APIResponse{}
@@ -83,7 +97,7 @@ func (ae *GbeConsumer) ApiTraverse(path, queryString string) ([]json.RawMessage,
 		err := decoder.Decode(apiResponse1)
 
 		if err != nil {
-			return []json.RawMessage{}, err
+			return []json.RawMessage{}, fmt.Errorf("Error decoding json response: ", err.Error())
 		}
 
 		// got a good first page response
@@ -92,8 +106,12 @@ func (ae *GbeConsumer) ApiTraverse(path, queryString string) ([]json.RawMessage,
 			if apiResponse1.Limit != 100 {
 				apiErrors.AddError("api limit changes, this is unexpected")
 			}
+
+			// TODO 0 == 2
 			var results []json.RawMessage
+			//fmt.Printf("%s", apiResponse1.Results)
 			if len(apiResponse1.Results) > 0 {
+
 				results = []json.RawMessage{apiResponse1.Results}
 			}
 			numPages := int(math.Ceil(float64(apiResponse1.NumberOfTotalResults) / float64(apiResponse1.Limit)))
@@ -101,10 +119,10 @@ func (ae *GbeConsumer) ApiTraverse(path, queryString string) ([]json.RawMessage,
 			for i := 2; i <= numPages; i++ {
 
 				params.Set("page", fmt.Sprintf("%d", i))
-				fmt.Println(params.Get("page"))
+				//fmt.Println(params.Get("page"))
 
 				pageQuery := BuildQuery(ae.apiUrl, path, params)
-				fmt.Println(pageQuery)
+				//fmt.Println(pageQuery)
 
 				pageResp, err := http.Get(pageQuery)
 				if err != nil {

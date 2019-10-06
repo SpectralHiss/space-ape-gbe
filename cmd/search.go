@@ -16,21 +16,44 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 
+	"os"
+
+	"github.com/SpectralHiss/space-ape-gbe/search"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
+
+func jsonPrint(res []search.SearchResponse) {
+	bytes, err := json.Marshal(res)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Problem formatting result output")
+	}
+
+	fmt.Println(string(bytes))
+}
 
 // searchCmd represents the search command
 var searchCmd = &cobra.Command{
 	Use:   "search",
 	Short: "Searches GiantBomb's api for a game",
 	Long:  `Search searches titles blablab`,
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			fmt.Println(cmd.Short)
+		url := viper.GetString("API_URL")
+		key := viper.GetString("API_KEY")
+
+		searcher := search.NewSearcher(url, key)
+		out, err := searcher.SearchTitles(args[0])
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "We having problem searching games: %s", err.Error())
 		}
+
+		jsonPrint(out)
 		//fmt.Println("search called")
+
 	},
 }
 

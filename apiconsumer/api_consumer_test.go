@@ -92,7 +92,7 @@ var _ = Describe("ApiConsumer", func() {
 			params.Add("query", "zzefseqg")
 		})
 
-		It("returns an empty response, no error", func() {
+		FIt("returns an empty response, no error", func() {
 			Expect(outErr).To(BeNil())
 			Expect(outRes).To(Equal([]json.RawMessage{}))
 		})

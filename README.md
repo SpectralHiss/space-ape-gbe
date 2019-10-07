@@ -9,6 +9,8 @@ NOTE:
 Despite giantbomb's api has an invalid api key error the api just returns 401 with an empty body.
 empty api_key returns INVALID API KEY response whereas an incorrect key returns empty body
 
+Expected date vs original release date?
+
 TODO:
 remove existing api_key refs and change to env vars 
 use query filtering to reduce payload

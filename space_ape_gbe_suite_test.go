@@ -1,6 +1,7 @@
 package main_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -9,6 +10,7 @@ import (
 	"os/exec"
 	"testing"
 
+	"github.com/SpectralHiss/space-ape-gbe/fetch"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -99,10 +101,10 @@ var _ = Describe("GiantBomb cli", func() {
 				args = []string{"search", "half-life"}
 			})
 
-			FIt("Returns the right search results for that query term", func() {
+			It("Returns the right search results for that query term", func() {
 				Expect(command.ProcessState.ExitCode()).To(Equal(0))
 				//println(output)
-				content, err := ioutil.ReadFile("./test_output/full.json")
+				content, err := ioutil.ReadFile("./test_output/full-search.json")
 				Expect(err).To(BeNil())
 				//fmt.Printf(string(content))
 				Expect(output).To(MatchJSON(string(content)))
@@ -118,15 +120,31 @@ var _ = Describe("GiantBomb cli", func() {
 			})
 
 			When("the DLC option is not supplied", func() {
-				It("returns the game details without  the DLC", func() {
+				It("returns the game details without  the DLCs", func() {
+					content, err := ioutil.ReadFile("./test_output/full-fetch-no-dlc.json")
+					Expect(err).To(BeNil())
+					//fmt.Printf(string(content))
+					Expect(output).To(MatchJSON(string(content)))
 
 				})
 			})
 
 			When("the DLC is option is supplied", func() {
-				It("returns the details including a summary of DLCs", func() {})
+
+				BeforeEach(func() {
+					args = append(args, "-dlcs")
+				})
+
+				It("returns the details including the DLCs", func() {
+					data := fetch.GameResponseDLCs{}
+					err := json.Unmarshal(output, &data)
+					Expect(err).NotTo(BeNil())
+					Expect(len(data.DLCs)).To(Equal(28))
+				})
 			})
 		})
+
+		// TODO edge case where game has  no DLC
 
 	})
 })

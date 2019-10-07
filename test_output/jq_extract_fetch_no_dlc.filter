@@ -1,0 +1,13 @@
+[.results | 
+{name : .name, deck: .deck, release_date:(.expected_release_year // "not yet released") , 
+platforms: [.platforms[]? | .name ], 
+id: .id,
+genres: [.genres[].name],
+description: .description,
+characters: [.characters[].name],
+publishers: [.publishers[].name],
+developers: [.developers[].name],
+franchises: [.franchises[].name],
+
+"game rating": [.original_game_rating[].name],
+}]

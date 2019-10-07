@@ -97,7 +97,7 @@ func (ae *GbeConsumer) ApiTraverse(path, queryString string) ([]json.RawMessage,
 		err := decoder.Decode(apiResponse1)
 
 		if err != nil {
-			return []json.RawMessage{}, fmt.Errorf("Error decoding json response: ", err.Error())
+			return []json.RawMessage{}, fmt.Errorf("Error decoding json response: %s", err.Error())
 		}
 
 		// got a good first page response

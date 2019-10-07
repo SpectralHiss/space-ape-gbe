@@ -28,7 +28,7 @@ func IsJSON(s json.RawMessage) bool {
 }
 
 var _ = Describe("ApiConsumer", func() {
-	var serverURL = "http://localhost:8080"
+	var serverURL = os.Getenv("API_URL")
 
 	var cd, _ = os.Getwd()
 	var cmd *exec.Cmd
@@ -75,7 +75,7 @@ var _ = Describe("ApiConsumer", func() {
 	BeforeEach(func() {
 		consumer = apiconsumer.NewGBE(serverURL)
 		params = url.Values{}
-		params.Add("api_key", "ce4949c5a501cdc3b0cdfbca070fd53787ba59a1")
+		params.Add("api_key", os.Getenv("API_KEY"))
 		params.Add("resources", "game")
 		params.Add("format", "json")
 		params.Add("limit", "100")

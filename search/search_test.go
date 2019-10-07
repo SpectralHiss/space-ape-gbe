@@ -22,6 +22,14 @@ func TestSearch(t *testing.T) {
 	RunSpecs(t, "Search Suite")
 }
 
+// func MustEnv(envString string) string {
+// 	val, err := os.Env(envString)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	return val
+// }
+
 var _ = Describe("Search", func() {
 
 	var serverURL = "http://localhost:8080"
@@ -67,7 +75,10 @@ var _ = Describe("Search", func() {
 
 	When("search is called with a param that yields results", func() {
 		BeforeEach(func() {
-			searcher = search.NewSearcher("http://localhost:8080", "ce4949c5a501cdc3b0cdfbca070fd53787ba59a1")
+			url := os.Getenv("API_URL")
+			key := os.Getenv("API_KEY")
+
+			searcher = search.NewSearcher(url, key)
 		})
 		It("returns a condensed list of results", func() {
 
@@ -100,10 +111,15 @@ var _ = Describe("Search", func() {
 
 	})
 	When("search is called with a param that has no results", func() {
-		It("returns no results", func() {})
+		It("returns no results", func() {
+			res, err := searcher.SearchTitles("zzefseqg")
+			Expect(err).To(BeNil())
+			Expect(len(res)).To(Equal(0))
+		})
 	})
 
-	When("search is called but there is some error in the apis", func() {
+	//TODO
+	When("search is called but the api is down", func() {
 		It("returns an informative error", func() {})
 	})
 })

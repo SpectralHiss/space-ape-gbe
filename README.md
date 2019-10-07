@@ -7,9 +7,12 @@ We discovered this api has pagination and only allows a maximum limit value of 1
 
 NOTE:
 Despite giantbomb's api has an invalid api key error the api just returns 401 with an empty body.
-TODO:
-add config for api_key (currently hardcoded)
+empty api_key returns INVALID API KEY response whereas an incorrect key returns empty body
 
+TODO:
+remove existing api_key refs and change to env vars 
+use query filtering to reduce payload
+sort out null -> not yet released
 
 // currently this will dump the json as is, improvement could be to use "text/template" to beautify or give option
 

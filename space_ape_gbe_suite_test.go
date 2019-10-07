@@ -113,6 +113,9 @@ var _ = Describe("GiantBomb cli", func() {
 
 	Describe("Getting a specific game by ID", func() {
 		When("A game is fetched by ID", func() {
+			BeforeEach(func() {
+				args = []string{"fetch", "29935"}
+			})
 
 			When("the DLC option is not supplied", func() {
 				It("returns the game details without  the DLC", func() {

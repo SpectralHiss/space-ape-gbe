@@ -22,6 +22,34 @@ func logQuery(r *http.Request) {
 	log.Print(r.RequestURI)
 }
 
+func writeResponse(w http.ResponseWriter, fixturePath string, statusCode int) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(statusCode)
+	content, err := ioutil.ReadFile(fixturePath)
+	if err != nil {
+		errPrint(err)
+	}
+	w.Write(content)
+}
+
+func checkAPIK(w http.ResponseWriter, val string) {
+	if val == "" || val != API_K {
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(401)
+		var content = []byte("")
+		if val == "" {
+			var err error
+			content, err = ioutil.ReadFile(fmt.Sprintf("%s/fixtures/no_api_key.json", dir))
+			if err != nil {
+				errPrint(err)
+			}
+			w.Write(content)
+		}
+
+		return
+	}
+}
+
 func StartServer() {
 
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
@@ -35,23 +63,21 @@ func StartServer() {
 
 	const API_K = "ce4949c5a501cdc3b0cdfbca070fd53787ba59a1"
 
+	// bad gameid
+	http.HandleFunc("/api/game/10000000", func() {
+
+	})
+
+	http.HandleFunc("/api/game/29935", func() {
+
+	})
+
 	http.HandleFunc("/api/search", func(w http.ResponseWriter, r *http.Request) {
 		logQuery(r)
 		params := r.URL.Query()
 
 		val := params.Get("api_key")
-		if val == "" || val != API_K {
-			w.Header().Set("Content-Type", "application/json; charset=utf-8")
-			w.WriteHeader(401)
-
-			// content, err := ioutil.ReadFile(fmt.Sprintf("%s/fixtures/no_api_key.json", dir))
-			// if err != nil {
-			// 	errPrint(err)
-			// }
-			//w.Write(content)
-			w.Write([]byte(""))
-			return
-		}
+		checkAPIK(w, val)
 
 		// api can have max limit of 100, so let's use that
 		if params.Get("resources") != "game" || params.Get("format") != "json" || params.Get("limit") != "100" {
@@ -61,21 +87,12 @@ func StartServer() {
 		}
 		query := params.Get("query")
 		if query == "" {
-			w.Header().Set("Content-Type", "application/json; charset=utf-8")
-			w.WriteHeader(200)
-			content, err := ioutil.ReadFile(fmt.Sprintf("%s/fixtures/no_query.json", dir))
-			if err != nil {
-				errPrint(err)
-			}
-			w.Write(content)
+
+			writeResponse(w, fmt.Sprintf("%s/fixtures/search/no_query.json", dir), 200)
 			return
 		}
 
 		if query == "half-life" {
-
-			w.Header().Set("Content-Type", "application/json; charset=utf-8")
-
-			w.WriteHeader(200)
 
 			var filename string
 			page := params.Get("page")
@@ -85,22 +102,12 @@ func StartServer() {
 				filename = fmt.Sprintf("%s.json", page)
 			}
 
-			content, err := ioutil.ReadFile(fmt.Sprintf("%s/fixtures/half-life/%s", dir, filename))
-			if err != nil {
-				errPrint(err)
-			}
-			w.Write(content)
+			writeResponse(w, fmt.Sprintf("%s/fixtures/search/half-life/%s", dir, filename), 200)
 			return
 		}
 		if query == "zzefseqg" {
-			w.Header().Set("Content-Type", "application/json; charset=utf-8")
-			w.WriteHeader(200)
 
-			content, err := ioutil.ReadFile(fmt.Sprintf("%s/fixtures/zzefseqg/bad.json", dir))
-			if err != nil {
-				errPrint(err)
-			}
-			w.Write(content)
+			writeResponse(w, fmt.Sprintf("%s/fixtures/search/zzefseqg/bad.json", dir), 200)
 			return
 		}
 

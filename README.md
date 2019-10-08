@@ -2,7 +2,7 @@
 Spaceape Technical Test: Giant Bomb Edition
 
 We have packaged tests and the binary with docker-compose
-run `docker-compose run tests` to run tests
+run `docker-compose run test` to run tests
 
 
 set env `API_KEY` to your api key

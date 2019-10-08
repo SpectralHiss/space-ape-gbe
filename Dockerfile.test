@@ -1,0 +1,12 @@
+FROM golang:1.13
+
+ADD . /app
+
+WORKDIR /app
+
+RUN go get github.com/onsi/gomega && \
+   go get github.com/onsi/ginkgo/ginkgo
+
+COPY --from=space-ape-gbe_binary ./main /app/space-ape-gbe
+RUN go test -i
+ENTRYPOINT ["go", "test", "./...", "-v"]

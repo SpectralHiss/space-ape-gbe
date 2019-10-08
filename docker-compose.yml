@@ -9,11 +9,6 @@ services:
     environment:
       - API_URL=http://fake:8080
       - API_KEY
-  binary:
-    build: .
-    environment:
-      - API_URL
-      - API_KEY
   fake:
     build:
       context: ./fake-api/

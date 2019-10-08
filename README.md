@@ -7,19 +7,22 @@ run `docker-compose run tests` to run tests
 
 set env `API_KEY` to your api key
 `API_URL` should also be set to "https://giantbomb.com"
-and run `docker-compose run binary` to run the binary
 
-NOTE:
+run the binary with : 
+`docker run  -e API_URL=https://giantbomb.com -e API_KEY=YOUR_KEY` IMAGE
+
+API GOTCHAS:
 We discovered this api has pagination and only allows a maximum limit value of 100
 Despite giantbomb's api has an invalid api key error the api just returns 401 with an empty body.
 empty api_key returns INVALID API KEY response whereas an incorrect key returns empty body
 
 TODO:
 use query filtering to reduce payload
+parallelize page fetch also (only done dlc fetching in parallel)
 
+presentation:
 sort out null -> not yet released
 flatten out Name -> string
-spawn and waitgroup synchronization for each page request and dlc query
+format flag ? yaml json text/template
 
-// currently this will dump the json as is, improvement could be to use "text/template" to beautify and flatten name or give option
 

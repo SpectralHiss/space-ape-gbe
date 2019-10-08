@@ -11,6 +11,10 @@ set env `API_KEY` to your api key
 run the binary with : 
 `docker run  -e API_URL=https://giantbomb.com -e API_KEY=YOUR_KEY IMAGE`
 
+## Running confusion!!
+sorry about the trouble I had devised a testing dockerfile and it was not checked in, I had to rush at the end
+I have committed it now so you can fairly appraise it..
+
 ## API GOTCHAS:
 We discovered this api has pagination and only allows a maximum limit value of 100
 Despite giantbomb's api has an invalid api key error the api just returns 401 with an empty body.

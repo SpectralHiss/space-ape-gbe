@@ -6,8 +6,8 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
-	 "github.com/gorilla/mux"
+
+	"github.com/gorilla/mux"
 )
 
 //type fake_gbe_server struct {
@@ -23,29 +23,27 @@ func logQuery(r *http.Request) {
 	log.Print(r.RequestURI)
 }
 
-const API_K = "ce4949c5a501cdc3b0cdfbca070fd53787ba59a1"
-
+var API_K = os.Getenv("API_KEY")
 
 var dir string
 
 func StartServer() {
-	var err error
-	dir, err = filepath.Abs(filepath.Dir(os.Args[0]))
-	if err != nil {
-		log.Fatal(err)
-	}
+	// var err error
+	// dir, err = os.Getwd()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	dir = "/go/src/app" // careful with this depending on context
 
 	// server needs to have map of response to inputs
 	// response types are: pages api response, simple response, errors
 	// hard codes listeners  addResponse("term", GoodPagedResponse)
 
-
-
 	// bad gameid
 
 	rtr := mux.NewRouter()
 
-	rtr.HandleFunc("/api/dlc/{guid}", func(w http.ResponseWriter, r *http.Request){
+	rtr.HandleFunc("/api/dlc/{guid}", func(w http.ResponseWriter, r *http.Request) {
 		logQuery(r)
 		params := r.URL.Query()
 
@@ -53,29 +51,28 @@ func StartServer() {
 		if !checkAPIK(w, val) {
 			return
 		}
-		massEDLCs := []string{"3100","3101", "3102", "3184", "3185", "3186", "3288", "3289", "3290", "3431", "3432",
-		 "3433", "3561",  "3562", "3563", "3706",  "3742",  "3866", "3867", "3868", "3869" ,"3870", "3871",
-		  "3919", "3920", "3921", "3922" ,"3929"}
-		  vars := mux.Vars(r)
-		  guid, ok := vars["guid"]
-		  // mass effect 29935
-		  if !ok {
-			  notFound := fmt.Sprintf("%s/fixtures/fetch/no_guid_not_found.html")
-			  writeResponseHTML(w, notFound , 404)
-			  return
-		  }
+		massEDLCs := []string{"3100", "3101", "3102", "3184", "3185", "3186", "3288", "3289", "3290", "3431", "3432",
+			"3433", "3561", "3562", "3563", "3706", "3742", "3866", "3867", "3868", "3869", "3870", "3871",
+			"3919", "3920", "3921", "3922", "3929", "3930", "3931"}
+		vars := mux.Vars(r)
+		guid, ok := vars["guid"]
+		// mass effect 29935
+		if !ok {
+			notFound := fmt.Sprintf("%s/fixtures/fetch/no_guid_not_found.html", dir)
+			writeResponseHTML(w, notFound, 404)
+			return
+		}
 
-		  
-		  if contains(massEDLCs, guid) {
+		if contains(massEDLCs, guid) {
 			writeResponse(w, fmt.Sprintf("%s/fixtures/fetch/mass-effect-dlcs/%s.json", dir, guid), 200)
 			return
-		  } else {
-			  println(dir)
-			writeResponse(w, fmt.Sprintf("%s/fixtures/fetch/bad.json",dir),200)
+		} else {
+			println(dir)
+			writeResponse(w, fmt.Sprintf("%s/fixtures/fetch/bad.json", dir), 200)
 			return
-		  }
+		}
 
-		})
+	})
 
 	rtr.HandleFunc("/api/game/{guid}", func(w http.ResponseWriter, r *http.Request) {
 
@@ -87,7 +84,7 @@ func StartServer() {
 			return
 		}
 		// api can have max limit of 100, so let's use that
-		if params.Get("format") != "json" || params.Get("limit") != "100" {
+		if params.Get("format") != "json" {
 			w.WriteHeader(400)
 			w.Write([]byte("NOT FAKED"))
 			return
@@ -96,21 +93,21 @@ func StartServer() {
 		guid, ok := vars["guid"]
 		// mass effect 29935
 		if !ok {
-			notFound := fmt.Sprintf("%s/fixtures/fetch/no_guid_not_found.html",dir)
-			writeResponseHTML(w, notFound , 404)
+			notFound := fmt.Sprintf("%s/fixtures/fetch/no_guid_not_found.html", dir)
+			writeResponseHTML(w, notFound, 404)
 			return
 		}
-		
+
 		if guid == "29935" {
 			println(dir)
-			writeResponse(w, fmt.Sprintf("%s/fixtures/fetch/mass-effect-3.json",dir), 200)
+			writeResponse(w, fmt.Sprintf("%s/fixtures/fetch/mass-effect-3.json", dir), 200)
 			return
-		} 
-		
+		}
+
 		if guid == "999999999" {
-			writeResponse(w, fmt.Sprintf("%s/fixtures/fetch/bad.json",dir),200)
+			writeResponse(w, fmt.Sprintf("%s/fixtures/fetch/bad.json", dir), 200)
 			return
-		// 10000000
+			// 10000000
 		}
 	})
 
@@ -168,8 +165,6 @@ func main() {
 	StartServer()
 }
 
-
-
 func writeResponseHTML(w http.ResponseWriter, fixturePath string, statusCode int) {
 	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 	w.WriteHeader(statusCode)
@@ -210,10 +205,10 @@ func checkAPIK(w http.ResponseWriter, val string) bool {
 }
 
 func contains(s []string, e string) bool {
-    for _, a := range s {
-        if a == e {
-            return true
-        }
-    }
-    return false
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }

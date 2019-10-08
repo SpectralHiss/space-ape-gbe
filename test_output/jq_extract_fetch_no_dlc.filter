@@ -1,13 +1,12 @@
-[.results | 
-{name : .name, deck: .deck, release_date:(.expected_release_year // "not yet released") , 
-platforms: [.platforms[]? | .name ], 
+.results | 
+{name : .name, deck: .deck, expected_release_year:(.expected_release_year // "not yet released") , 
+platforms: [{name:.platforms[].name}], 
 id: .id,
-genres: [.genres[].name],
+genres: [{name:.genres[].name}],
 description: .description,
-characters: [.characters[].name],
-publishers: [.publishers[].name],
-developers: [.developers[].name],
-franchises: [.franchises[].name],
-
-"game rating": [.original_game_rating[].name],
-}]
+characters: [{name: .characters[].name}],
+publishers: [{name:.publishers[].name}],
+developers: [{name:.developers[].name}],
+franchises: [{name:.franchises[].name}],
+original_game_rating: [{name:.original_game_rating[].name}],
+}

@@ -44,6 +44,11 @@ func (ae *APIErrors) Niller() error {
 	}
 }
 
+func isEmptyArray(data json.RawMessage) bool {
+	// ugly but cheap
+	return bytes.Equal([]byte(data), []byte("[]"))
+}
+
 type APIResponse struct {
 	StatusCode           int `json:"status_code"`
 	Error                string
@@ -73,7 +78,6 @@ func (ae *GbeConsumer) ApiTraverse(path, queryString string) ([]json.RawMessage,
 	if err != nil {
 		return []json.RawMessage{}, fmt.Errorf("bad query")
 	}
-	params.Set("limit", "100")
 
 	resp, err := http.Get(BuildQuery(ae.apiUrl, path, params))
 
@@ -87,66 +91,63 @@ func (ae *GbeConsumer) ApiTraverse(path, queryString string) ([]json.RawMessage,
 
 	apiErrors := &APIErrors{}
 
-	//debugBody(resp.Body)
-
 	decoder := json.NewDecoder(resp.Body)
 
-	var apiResponse1 = &APIResponse{}
+	var apiResponseP1 = APIResponse{}
 
-	for decoder.More() {
-		err := decoder.Decode(apiResponse1)
+	err = decoder.Decode(&apiResponseP1)
 
-		if err != nil {
-			return []json.RawMessage{}, fmt.Errorf("Error decoding json response: %s", err.Error())
-		}
-
-		// got a good first page response
-		if apiResponse1.StatusCode == 1 {
-
-			if apiResponse1.Limit != 100 {
-				apiErrors.AddError("api limit changes, this is unexpected")
-			}
-
-			// TODO 0 == 2
-			var results []json.RawMessage
-			//fmt.Printf("%s", apiResponse1.Results)
-			if len(apiResponse1.Results) > 0 {
-
-				results = []json.RawMessage{apiResponse1.Results}
-			}
-			numPages := int(math.Ceil(float64(apiResponse1.NumberOfTotalResults) / float64(apiResponse1.Limit)))
-
-			for i := 2; i <= numPages; i++ {
-
-				params.Set("page", fmt.Sprintf("%d", i))
-				//fmt.Println(params.Get("page"))
-
-				pageQuery := BuildQuery(ae.apiUrl, path, params)
-				//fmt.Println(pageQuery)
-
-				pageResp, err := http.Get(pageQuery)
-				if err != nil {
-					apiErrors.AddError(fmt.Sprintf("Error fetching page %d", i))
-				}
-
-				var ParsedPageResponse = &APIResponse{}
-				decoder := json.NewDecoder(pageResp.Body)
-				err = decoder.Decode(ParsedPageResponse)
-
-				if err != nil {
-					return []json.RawMessage{}, err
-				}
-
-				results = append(results, ParsedPageResponse.Results)
-
-			}
-
-			return results, apiErrors.Niller()
-
-		}
-		apiErrors.AddError(apiResponse1.Error)
-
+	if err != nil {
+		return []json.RawMessage{}, fmt.Errorf("Error decoding json response: %s", err.Error())
 	}
 
+	// got a good first page response
+	if apiResponseP1.StatusCode == 1 {
+
+		// TODO 0 == 2
+		var results = []json.RawMessage{}
+		//fmt.Printf("%s", apiResponse1.Results)
+		if !isEmptyArray(apiResponseP1.Results) {
+			results = []json.RawMessage{apiResponseP1.Results}
+		}
+
+		numPages := int(math.Ceil(float64(apiResponseP1.NumberOfTotalResults) / float64(apiResponseP1.Limit)))
+
+		for i := 2; i <= numPages; i++ {
+			params.Set("page", fmt.Sprintf("%d", i))
+			parsedResponse, err := ae.fetchPage(path, params)
+			if err != nil {
+				apiErrors.AddError(err.Error())
+			}
+			results = append(results, parsedResponse.Results)
+
+		}
+
+		return results, apiErrors.Niller()
+	}
+	apiErrors.AddError(apiResponseP1.Error)
+
 	return []json.RawMessage{}, apiErrors.Niller()
+}
+
+func (ae *GbeConsumer) fetchPage(path string, params url.Values) (APIResponse, error) {
+	//fmt.Println(params.Get("page"))
+
+	pageQuery := BuildQuery(ae.apiUrl, path, params)
+	//fmt.Println(pageQuery)
+
+	pageResp, err := http.Get(pageQuery)
+	if err != nil {
+		return APIResponse{}, fmt.Errorf("Error fetching page %s", params.Get("page"))
+	}
+
+	var ParsedPageResponse = APIResponse{}
+	decoder := json.NewDecoder(pageResp.Body)
+	err = decoder.Decode(&ParsedPageResponse)
+
+	if err != nil {
+		return APIResponse{}, err
+	}
+
+	return ParsedPageResponse, nil
 }

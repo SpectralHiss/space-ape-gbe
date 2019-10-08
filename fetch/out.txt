@@ -1,0 +1,67 @@
+Running Suite: Fetch Suite
+==========================
+Random Seed: [1m1570488305[0m
+Will run [1m1[0m of [1m5[0m specs
+
+[36mS[0mCOOLio
+COOLio
+COOLio
+COOLio
+COOLio
+COOLio
+COOLio
+COOLio
+COOLio
+COOLio
+COOLio
+COOLio
+COOLio
+COOLio
+COOLio
+COOLio
+COOLio
+COOLio
+COOLio
+COOLio
+COOLio
+COOLio
+COOLio
+COOLio
+COOLio
+COOLio
+COOLio
+COOLio
+COOLio
+
+[90m------------------------------[0m
+[91m[1m• Failure [0.022 seconds][0m
+Fetch
+[90m/home/pentium/code/space-ape-gbe/fetch/fetch_test.go:30[0m
+  when fetch is called for a real game
+  [90m/home/pentium/code/space-ape-gbe/fetch/fetch_test.go:86[0m
+    when And DlC is supplied
+    [90m/home/pentium/code/space-ape-gbe/fetch/fetch_test.go:106[0m
+      when The game has DLCs
+      [90m/home/pentium/code/space-ape-gbe/fetch/fetch_test.go:110[0m
+        [91m[1mreturns a description with dlcs, sorted by release date (ascending) [It][0m
+        [90m/home/pentium/code/space-ape-gbe/fetch/fetch_test.go:111[0m
+
+        [91mExpected
+            <string>: 
+        not to be empty[0m
+
+        /home/pentium/code/space-ape-gbe/fetch/fetch_test.go:115
+[90m------------------------------[0m
+[36mS[0m[36mS[0m[36mS[0m
+
+[91m[1mSummarizing 1 Failure:[0m
+
+[91m[1m[Fail] [0m[90mFetch [0m[0mwhen fetch is called for a real game [0m[90mwhen And DlC is supplied [0m[0mwhen The game has DLCs [0m[91m[1m[It] returns a description with dlcs, sorted by release date (ascending) [0m
+[37m/home/pentium/code/space-ape-gbe/fetch/fetch_test.go:115[0m
+
+[1m[91mRan 1 of 5 Specs in 0.023 seconds[0m
+[1m[91mFAIL![0m -- [32m[1m0 Passed[0m | [91m[1m1 Failed[0m | [33m[1m0 Pending[0m | [36m[1m4 Skipped[0m
+--- FAIL: TestFetch (0.02s)
+FAIL
+FAIL	github.com/SpectralHiss/space-ape-gbe/fetch	0.028s
+FAIL

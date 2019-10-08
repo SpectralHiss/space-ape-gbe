@@ -2,13 +2,9 @@ package apiconsumer_test
 
 import (
 	"encoding/json"
-	"fmt"
-	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
-	"os/exec"
 	"testing"
 
 	"github.com/SpectralHiss/space-ape-gbe/apiconsumer"
@@ -27,43 +23,17 @@ func IsJSON(s json.RawMessage) bool {
 	return json.Unmarshal([]byte(s), &js) == nil
 }
 
+var cd string
+
 var _ = Describe("ApiConsumer", func() {
 	var serverURL = os.Getenv("API_URL")
 
-	var cd, _ = os.Getwd()
-	var cmd *exec.Cmd
-	var serverOut io.ReadCloser
-
 	BeforeSuite(func() {
-		cmd = exec.Command(fmt.Sprintf("%s/../fake-api/fake-api", cd))
-		var err error
-		Expect(err).To(BeNil())
-
-		serverOut, err = cmd.StdoutPipe()
-
-		Expect(err).To(BeNil())
-
-		err = cmd.Start()
-		Expect(err).To(BeNil())
 
 		Eventually(func() error {
 			_, err := http.Get(serverURL)
 			return err
 		}).Should(BeNil())
-
-	})
-
-	AfterSuite(func() {
-
-		// time.Sleep(400000000000)
-		err := cmd.Process.Kill()
-		if err != nil {
-			panic(err)
-		}
-
-		output, err := ioutil.ReadAll(serverOut)
-		Expect(err).To(BeNil())
-		fmt.Printf("FULL OUTPUT: %s", string(output))
 
 	})
 
@@ -92,7 +62,7 @@ var _ = Describe("ApiConsumer", func() {
 			params.Add("query", "zzefseqg")
 		})
 
-		FIt("returns an empty response, no error", func() {
+		It("returns an empty response, no error", func() {
 			Expect(outErr).To(BeNil())
 			Expect(outRes).To(Equal([]json.RawMessage{}))
 		})

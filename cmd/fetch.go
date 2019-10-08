@@ -16,37 +16,74 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 
+	"github.com/SpectralHiss/space-ape-gbe/fetch"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // fetchCmd represents the fetch command
+
 var fetchCmd = &cobra.Command{
 	Use:   "fetch",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Fetches game details for a particular guid",
+	Long: `This command can fetch more details about a particular game:
+	You can also get upcoming DLCs by adding the -dlcs flag
+	eg: "fetch [guid] {--dlcs}"
+	`,
 	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("fetch called")
+
+		url := viper.GetString("API_URL")
+		key := viper.GetString("API_KEY")
+
+		fetcher := fetch.NewFetcher(url, key)
+
+		dlcs, _ := cmd.Flags().GetBool("dlcs")
+
+		if dlcs {
+			out, err := fetcher.FetchWDLCs(args[0])
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "We having problem fetching game: %s", err.Error())
+			}
+
+			//fmt.Print(out)
+
+			jsonPrintGameDLCs(out)
+			return
+		}
+
+		out, err := fetcher.Fetch(args[0])
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "We having problem fetching game: %s", err.Error())
+		}
+
+		jsonPrintGame(out)
+		return
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(fetchCmd)
+}
 
-	// Here you will define your flags and configuration settings.
+func jsonPrintGame(res fetch.GameResponse) {
+	bytes, err := json.Marshal(res)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Problem formatting result output")
+	}
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// fetchCmd.PersistentFlags().String("foo", "", "A help for foo")
+	fmt.Println(string(bytes))
+}
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// fetchCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+func jsonPrintGameDLCs(res fetch.GameResponseDLCs) {
+	bytes, err := json.Marshal(res)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Problem formatting result output")
+	}
+
+	fmt.Println(string(bytes))
 }

@@ -1,12 +1,8 @@
 package search_test
 
 import (
-	"fmt"
-	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
-	"os/exec"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -22,52 +18,14 @@ func TestSearch(t *testing.T) {
 	RunSpecs(t, "Search Suite")
 }
 
-// func MustEnv(envString string) string {
-// 	val, err := os.Env(envString)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	return val
-// }
-
 var _ = Describe("Search", func() {
 
-	var serverURL = "http://localhost:8080"
-
-	var cd, _ = os.Getwd()
-	var cmd *exec.Cmd
-	var serverOut io.ReadCloser
-
 	BeforeSuite(func() {
-		cmd = exec.Command(fmt.Sprintf("%s/../fake-api/fake-api", cd))
-		var err error
-		Expect(err).To(BeNil())
-
-		serverOut, err = cmd.StdoutPipe()
-
-		Expect(err).To(BeNil())
-
-		err = cmd.Start()
-		Expect(err).To(BeNil())
 
 		Eventually(func() error {
-			_, err := http.Get(serverURL)
+			_, err := http.Get(os.Getenv("API_URL"))
 			return err
-		}).Should(BeNil())
-
-	})
-
-	AfterSuite(func() {
-
-		// time.Sleep(400000000000)
-		err := cmd.Process.Kill()
-		if err != nil {
-			panic(err)
-		}
-
-		output, err := ioutil.ReadAll(serverOut)
-		Expect(err).To(BeNil())
-		fmt.Printf("FULL OUTPUT: %s", string(output))
+		}, 5).Should(BeNil())
 
 	})
 

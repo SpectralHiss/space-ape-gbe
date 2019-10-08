@@ -1,0 +1,3 @@
+jq pattern used to extract correct structure for search:
+
+cat 1.json 2.json 3.json | jq  '[.results[] | {name : .name, deck: .deck, release_date:(.expected_release_year // "not yet released") , platforms: [.platforms[]? | .name ], id: .id}] ' > output.json

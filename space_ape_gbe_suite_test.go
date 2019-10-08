@@ -3,8 +3,8 @@ package main_test
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -20,7 +20,7 @@ func TestSpaceApeGbe(t *testing.T) {
 	RunSpecs(t, "SpaceApeGbe Suite")
 }
 
-var cd, _ = os.Getwd()
+var cd string
 
 func cmdWithArgs(ss ...string) *exec.Cmd {
 	return exec.Command(fmt.Sprintf("%s/%s", cd, "space-ape-gbe"), ss...)
@@ -28,52 +28,26 @@ func cmdWithArgs(ss ...string) *exec.Cmd {
 
 var _ = Describe("GiantBomb cli", func() {
 
-	var serverURL = "http://localhost:8080"
+	var serverURL = os.Getenv("API_URL")
 
-	var cd, _ = os.Getwd()
-	var fakeapicmd *exec.Cmd
-	var serverOut io.ReadCloser
+	var err error
+	cd, err = os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	var args []string
 
 	var command *exec.Cmd
-	var err error
+
 	var output []byte
 
 	BeforeSuite(func() {
-		fakeapicmd = exec.Command(fmt.Sprintf("%s/fake-api/fake-api", cd))
-		var err error
-		Expect(err).To(BeNil())
-
-		serverOut, err = fakeapicmd.StdoutPipe()
-
-		Expect(err).To(BeNil())
-
-		err = fakeapicmd.Start()
-		Expect(err).To(BeNil())
 
 		Eventually(func() error {
 			_, err := http.Get(serverURL)
 			return err
 		}).Should(BeNil())
-
-		cmd := exec.Command("go", "build", cd)
-		err = cmd.Run()
-		Expect(err).To(BeNil())
-
-	})
-
-	AfterSuite(func() {
-
-		// time.Sleep(400000000000)
-		err := fakeapicmd.Process.Kill()
-		if err != nil {
-			panic(err)
-		}
-
-		output, err := ioutil.ReadAll(serverOut)
-		Expect(err).To(BeNil())
-		fmt.Printf("FULL OUTPUT: %s", string(output))
 
 	})
 
@@ -90,8 +64,8 @@ var _ = Describe("GiantBomb cli", func() {
 				args = []string{"search"}
 			})
 			It("returns a command description message", func() {
-				Expect(err).To(BeNil())
-				Expect(string(output)).To(ContainSubstring("Searches GiantBomb's api for a game"))
+				Expect(err).NotTo(BeNil())
+				Expect(string(output)).To(ContainSubstring("Error: requires at least 1 arg(s), only received 0"))
 			})
 		})
 
@@ -132,19 +106,22 @@ var _ = Describe("GiantBomb cli", func() {
 			When("the DLC is option is supplied", func() {
 
 				BeforeEach(func() {
-					args = append(args, "-dlcs")
+					args = []string{"fetch", "29935", "--dlcs"}
 				})
 
 				It("returns the details including the DLCs", func() {
 					data := fetch.GameResponseDLCs{}
+
 					err := json.Unmarshal(output, &data)
-					Expect(err).NotTo(BeNil())
-					Expect(len(data.DLCs)).To(Equal(28))
+					Expect(err).To(BeNil())
+
+					Expect(len(data.DLCs)).To(Equal(30))
+					//Expect(data.DLCs[0].ReleaseDate).NotTo(Equal(""))
 				})
 			})
 		})
 
-		// TODO edge case where game has  no DLC
+		// TODO case where game has  no DLC
 
 	})
 })

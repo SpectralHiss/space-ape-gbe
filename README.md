@@ -1,7 +1,10 @@
 # space-ape-gbe
 Spaceape Technical Test: Giant Bomb Edition
 
-We have packaged tests and the binary with docker-compose
+We have packaged tests with docker-compose
+to run, need to first compile binary:
+`docker build . -t space-ape-gbe_binary`
+then
 run `docker-compose run test` to run tests
 
 
@@ -13,7 +16,10 @@ run the binary with :
 
 ## Running confusion!!
 sorry about the trouble I had devised a testing dockerfile and it was not checked in, I had to rush at the end
-I have committed it now so you can fairly appraise it..
+I have committed it now so you can fairly appraise it.. One last thing as well, make sure the 
+--from step to matche whatever label you built the binary with
+the binary image with, it needs the binary because some tests shell out to test as black box
+oddly the From is not a syntax error and runs on my machine! 
 
 ## API GOTCHAS:
 We discovered this api has pagination and only allows a maximum limit value of 100
